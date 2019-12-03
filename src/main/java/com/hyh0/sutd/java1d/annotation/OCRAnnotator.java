@@ -17,8 +17,8 @@ import java.util.StringJoiner;
 public class OCRAnnotator extends BaseAnnotator {
     private static final Logger log = LoggerFactory.getLogger(AudioAnnotator.class);
 
-    private String extractPicture(String videoPath) throws IOException, InterruptedException {
-        Path tempPic = Files.createTempFile(getClass().getCanonicalName() + "temp-picture", ".jpg");
+    public static String extractPicture(String videoPath) throws IOException, InterruptedException {
+        Path tempPic = Files.createTempFile(OCRAnnotator.class.getCanonicalName() + "temp-picture", ".jpg");
 
         String command = "ffmpeg -y -sseof -3 -t 1 -i " + videoPath + " -update 1 -q:v 1 " + tempPic.toString();
         Process process = Runtime.getRuntime().exec(command);

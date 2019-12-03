@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class VideoProcessWorker {
     private static final Logger log = LoggerFactory.getLogger(VideoProcessWorker.class);
@@ -61,6 +62,20 @@ public class VideoProcessWorker {
                         .getReference(firebaseCoursePath + "/processedVideos/" + videoIndex + "/url")
                         .setValueAsync(videoURL);
                 log.info("URL added to firebase");
+                return null;
+            });
+
+            Path thumbnailPath = Paths.get(OCRAnnotator.extractPicture(exportPath.toString()));
+            String thumbnailBlobName = thumbnailPath.getFileName().toString();
+            CloudStorage.asyncUploadFile(bucketName, thumbnailBlobName, thumbnailPath, () -> {
+                String imageURL = CloudStorage.getPublicURL(bucketName, thumbnailBlobName);
+                log.info("thumbnail" + videoIndex + " has been uploaded to " + imageURL);
+                ConfiguredFirebaseApp.getDatabase()
+                        .getReference(firebaseCoursePath + "/processedVideos/" + videoIndex + "/thumbnail")
+                        .setValueAsync(imageURL);
+                if (!thumbnailPath.toFile().delete()) {
+                    thumbnailPath.toFile().deleteOnExit();
+                }
                 return null;
             });
         }
