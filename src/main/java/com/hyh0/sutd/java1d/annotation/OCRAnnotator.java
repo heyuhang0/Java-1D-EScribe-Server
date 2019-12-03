@@ -20,7 +20,7 @@ public class OCRAnnotator extends BaseAnnotator {
     public static String extractPicture(String videoPath) throws IOException, InterruptedException {
         Path tempPic = Files.createTempFile(OCRAnnotator.class.getCanonicalName() + "temp-picture", ".jpg");
 
-        String command = "ffmpeg -y -sseof -3 -t 1 -i " + videoPath + " -update 1 -q:v 1 " + tempPic.toString();
+        String command = "ffmpeg -y -sseof -5 -t 1 -i " + videoPath + " -update 1 -q:v 1 " + tempPic.toString();
         Process process = Runtime.getRuntime().exec(command);
         process.waitFor();
         if (process.exitValue() != 0) {
