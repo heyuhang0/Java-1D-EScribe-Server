@@ -29,10 +29,19 @@ public class SingleVideoReader extends VideoCapture implements VideoReader {
         return super.get(Videoio.CAP_PROP_FPS);
     }
 
+    /**
+     * Export a video clip
+     * @param startIndex index of clip first frame
+     * @param endIndex index of clip last frame
+     * @param outputPath output path
+     * @throws IOException
+     */
     @Override
     public void clip(int startIndex, int endIndex, String outputPath) throws IOException {
+        // get start time and end time
         long startTime = (long)(startIndex * 1000.0 / getFrameRate());
         long duration = (long)((endIndex - startIndex) * 1000.0 / getFrameRate());
+        // use FFmpeg to encode video clip
         FFmpegBuilder builder = new FFmpegBuilder()
                 .setInput(videoPath)
                 .overrideOutputFiles(true)

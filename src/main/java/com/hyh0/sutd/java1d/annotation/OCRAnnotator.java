@@ -17,6 +17,13 @@ import java.util.StringJoiner;
 public class OCRAnnotator extends BaseAnnotator {
     private static final Logger log = LoggerFactory.getLogger(AudioAnnotator.class);
 
+    /**
+     * Extract one key frame from given video
+     * @param videoPath video path
+     * @return temporary path of the extracted image file
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public static String extractPicture(String videoPath) throws IOException, InterruptedException {
         Path tempPic = Files.createTempFile(OCRAnnotator.class.getCanonicalName() + "temp-picture", ".jpg");
 
@@ -31,6 +38,10 @@ public class OCRAnnotator extends BaseAnnotator {
         return tempPic.toString();
     }
 
+    /**
+     * Do OCR for the given video
+     * @param videoPath path of the video to be annotated
+     */
     @Override
     public String annotate(String videoPath) throws Exception {
         String imagePath = extractPicture(videoPath);
@@ -40,6 +51,12 @@ public class OCRAnnotator extends BaseAnnotator {
         return result;
     }
 
+    /**
+     * Do OCR for given image
+     * @param filePath image file path
+     * @return recognized text
+     * @throws Exception
+     */
     private static String detectText(String filePath) throws Exception {
         try (FileInputStream imageStream = new FileInputStream(filePath)) {
             List<AnnotateImageRequest> requests = new ArrayList<>();

@@ -16,6 +16,13 @@ import java.util.StringJoiner;
 public class AudioAnnotator extends BaseAnnotator {
     private static final Logger log = LoggerFactory.getLogger(AudioAnnotator.class);
 
+    /**
+     * Extract audio (.wav) from given video
+     * @param videoPath video path
+     * @return temporary path of the extracted .wav audio file
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private String extractAudio(String videoPath) throws IOException, InterruptedException {
         Path tempAudio = Files.createTempFile(getClass().getCanonicalName() + "temp-audio", ".wav");
         String command = "ffmpeg -i " + videoPath + " -y -ar 16000 -acodec pcm_s16le -ac 1 " + tempAudio.toString();
@@ -28,15 +35,26 @@ public class AudioAnnotator extends BaseAnnotator {
         return tempAudio.toString();
     }
 
+    /**
+     * Do Speech-to-Text for the given video
+     * @param videoPath path of the video to be annotated
+     */
     @Override
     public String annotate(String videoPath) throws Exception {
         String audioPath = extractAudio(videoPath);
+        // upload audio file to cloud storage to avoid 1-minute limitation
         String audioURI = uploadAudio(audioPath);
         Files.deleteIfExists(Paths.get(audioPath));
 
         return googleSpeechToText(audioURI);
     }
 
+    /**
+     * Upload audioFile to google cloud storage
+     * @param audioFile audio file path
+     * @return URI of uploaded audio
+     * @throws IOException
+     */
     private static String uploadAudio(String audioFile) throws IOException {
         Path audioFilePath = Paths.get(audioFile);
         String bucketName = "1d-speech-to-text-audio";
@@ -45,6 +63,12 @@ public class AudioAnnotator extends BaseAnnotator {
         return CloudStorage.uploadFile(bucketName, blobName, audioFilePath);
     }
 
+    /**
+     * Do Speech-to-Text for audio file saved in Google Cloud Storage
+     * @param audioURI Google Cloud Storage URI of the audio file
+     * @return transcript of the audio file
+     * @throws Exception
+     */
     private static String googleSpeechToText(String audioURI) throws Exception {
         log.info("Start speech-to-text annotation for video " + audioURI);
         // Instantiates a client

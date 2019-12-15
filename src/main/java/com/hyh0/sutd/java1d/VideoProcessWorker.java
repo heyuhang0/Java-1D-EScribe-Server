@@ -30,22 +30,27 @@ public class VideoProcessWorker {
         Annotator ocrAnnotator = new OCRAnnotator();
 
         for (int i = 0; !clipper.isFinished(); i ++) {
+            // search for next video clip
             VideoClip clip = clipper.getNext();
             log.info("New clip generated: " + clip);
 
+            // encode and save video clip
             Path exportPath = Files.createTempFile(VideoProcessWorker.class.getCanonicalName() + "exported-video", ".mp4");
             clip.export(exportPath.toString());
             exportPath.toFile().deleteOnExit();
             log.info("Clip has been saved to " + exportPath);
 
             final int videoIndex = i;
-
+            // do speech-to-text recognition for encoded video
+            // and upload result to Firebase
             audioAnnotator.asyncAnnotate(exportPath.toString(), s -> {
                 log.info("updating speech recognition result");
                 ConfiguredFirebaseApp.getDatabase()
                         .getReference(firebaseCoursePath + "/processedVideos/" + videoIndex + "/speechRecognition")
                         .setValueAsync(s);
             });
+            // do OCR to recognize texts on screen and whiteboard
+            // upload result to Firebase
             ocrAnnotator.asyncAnnotate(exportPath.toString(), s -> {
                 log.info("updating slide recognition result");
                 ConfiguredFirebaseApp.getDatabase()
@@ -53,6 +58,8 @@ public class VideoProcessWorker {
                         .setValueAsync(s);
             });
 
+            // Upload video file to Google Cloud Storage
+            // and save url in Firebase
             String bucketName = "1d-processed-video";
             String blobName = exportPath.getFileName().toString();
             CloudStorage.asyncUploadFile(bucketName, blobName, exportPath, () -> {

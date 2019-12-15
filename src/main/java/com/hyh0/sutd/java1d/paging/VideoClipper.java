@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Video Clipper split recorded course video into multiple video clips
+ * based on frame differences
+ */
 public class VideoClipper {
     private VideoReader videoReader;
     private int prevIndex = 0;
@@ -21,6 +25,12 @@ public class VideoClipper {
         this.videoReader = videoReader;
     }
 
+    /**
+     * Skip next n frames
+     * @param n value of n
+     * @param frame output frame
+     * @return false if the video ends
+     */
     private boolean readNextNFrames(int n, Mat frame) {
         for (int i = 0; i < n; i++) {
             if (!videoReader.read(frame)) {
@@ -31,6 +41,10 @@ public class VideoClipper {
         return true;
     }
 
+    /**
+     * Get next video clip
+     * @return next video clip
+     */
     public VideoClip getNext() {
         Mat prevFrame = null;
         Mat currFrame;
@@ -73,6 +87,8 @@ public class VideoClipper {
                     }
                 }
 
+                // if matched feature points number is small and deceasing
+                // consider that as a new video clip
                 currMatchCount = listOfGoodMatches.size();
                 if (currMatchCount < 0.5 * prevMatchCount && currMatchCount < 50) {
                     VideoClip clip = new VideoClip(prevIndex, currIndex, videoReader);

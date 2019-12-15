@@ -50,6 +50,10 @@ public abstract class MultiVideoReader implements VideoReader {
         return false;
     }
 
+    /**
+     * Export a list of all available videos (Used by FFmpeg during video concatenation)
+     * @param dst output
+     */
     private void exportVideoList(Path dst) {
         try {
             PrintWriter writer = new PrintWriter(dst.toFile(), "UTF-8");
@@ -62,6 +66,12 @@ public abstract class MultiVideoReader implements VideoReader {
         }
     }
 
+    /**
+     * Concat videos in list to a single video
+     * @return Path of concat video
+     * @throws IOException
+     * @throws InterruptedException
+     */
     private Path concatVideo() throws IOException, InterruptedException {
         Path listFile = Files.createTempFile(getClass().getCanonicalName() + "-video-list", ".txt");
         exportVideoList(listFile);
@@ -81,10 +91,18 @@ public abstract class MultiVideoReader implements VideoReader {
         return concatVideo;
     }
 
+    /**
+     * Export a video clip
+     * @param startIndex index of clip first frame
+     * @param endIndex index of clip last frame
+     * @param outputPath output path
+     * @throws IOException
+     */
     @Override
     public void clip(int startIndex, int endIndex, String outputPath) throws IOException, InterruptedException {
         Path concatVideoPath = concatVideo();
         new SingleVideoReader(concatVideoPath.toString()).clip(startIndex, endIndex, outputPath);
+        // delete concat video
         if (!concatVideoPath.toFile().delete())
             concatVideoPath.toFile().deleteOnExit();
     }
