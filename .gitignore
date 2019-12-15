@@ -2,6 +2,10 @@
 firebase-service-account.json
 google-application-credentials.json
 
+# Files added by Android Studio
+/local.properties
+./idea/*.iml
+
 # Created by https://www.gitignore.io/api/java,gradle,intellij
 # Edit at https://www.gitignore.io/?templates=java,gradle,intellij
 
